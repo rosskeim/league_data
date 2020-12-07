@@ -1,8 +1,9 @@
 import requests, json
 import pandas as pd
+import datetime
 
 account = "bEEDcwc6ohmom9qBAJM7fHav5nSxp8H2E-Tfvf4iofQI0w"
-api_key = "RGAPI-2ec937e8-a268-4a61-9fb2-acbe514a7c26"
+api_key = "RGAPI-21774bc2-7376-4a99-8060-cdbc2765c16b"
 
 response = requests.get("https://na1.api.riotgames.com/lol/match/v4/matchlists/by-account/" + account + "?api_key=" + api_key)
 
@@ -16,8 +17,11 @@ current = 0
 wins = 0
 losses = 0
 
+print("Enter number of games: ")
+num = int(input())
+
 x = 1 
-while x <= 10:
+while x <= num:
   response = requests.get("https://na1.api.riotgames.com/lol/match/v4/matches/" + str(games[x]) + "?api_key=" + str(api_key))
   data = response.json()
   for y in data['participantIdentities']:
@@ -25,7 +29,15 @@ while x <= 10:
       part = y['participantId']
       for z in data['participants']:
         if z['participantId'] == part:
-          print("#" + str(games[x]) + ": " + str(z['timeline']['role']) + " " + str(z['timeline']['lane']) + " champion(" + str(z['championId']) + ") Win: " + str(z['stats']['win'])) 
+          duration = float(data['gameDuration']/60)
+          dpm = round(z['stats']['deaths']/duration, 2)
+          gpm =  round(z['stats']['goldEarned']/duration, 2)
+          cpm = round(z['stats']['totalMinionsKilled']/duration, 2)
+          print("#" + str(games[x]), end="-")
+          print(str(data['gameCreation']), end=":")
+          print(str(z['timeline']['role']) + " " + str(z['timeline']['lane']), end=" ")
+          print("champion(" + str(z['championId']) + ") Win: " + str(z['stats']['win']), end=" ")
+          print("DPM: " + str(dpm) + " GPM: " + str(gpm) + " CPM: " + str(cpm)) 
           if z['stats']['win'] == True:
             wins += 1
           else:
@@ -33,7 +45,8 @@ while x <= 10:
   current = x
   x = x + 1
 
-print("==========RESULTS==========")
+print("====================RESULTS====================")
 print("Games: " + str(current))
 print("Wins: " + str(wins))
 print("Losses: " + str(losses))
+print("Winrate: " + str(wins/current))
