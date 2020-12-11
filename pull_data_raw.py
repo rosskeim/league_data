@@ -3,10 +3,10 @@ import pandas as pd
 import datetime
 
 account = "bEEDcwc6ohmom9qBAJM7fHav5nSxp8H2E-Tfvf4iofQI0w"
-api_key = "RGAPI-e68f6cde-c59e-4776-b80e-6d0cb90e8ec2"
+api_key = "RGAPI-cf136e3f-ed3c-426d-8b82-9c39400374b9"
 
 ############### LOAD CHAMPION DICT ##################
-with open('champion.json') as f:
+with open('champion.json', encoding='utf-8') as f:
   data = json.load(f)
   champ_dict = {}
 
@@ -29,8 +29,8 @@ losses = 0
 print("Enter number of games: ")
 num = int(input())
 
-x = 1 
-while x <= num:
+x = num
+while x >= 0:
   response = requests.get("https://na1.api.riotgames.com/lol/match/v4/matches/" + str(games[x]) + "?api_key=" + str(api_key))
   data = response.json()
   for y in data['participantIdentities']:
@@ -43,7 +43,10 @@ while x <= num:
           gpm =  round(z['stats']['goldEarned']/duration, 2)
           cpm = round(z['stats']['totalMinionsKilled']/duration, 2)
           print("#" + str(games[x]), end="-")
-          print(str(data['gameCreation']), end=":")
+          rawtime = data['gameCreation']
+          timestamp = datetime.datetime.fromtimestamp(int(rawtime/1000)) 
+          gametime = timestamp.strftime('%d/%m/%Y %H:%M:%S')
+          print(str(gametime), end=":")
           print(str(z['timeline']['role']) + " " + str(z['timeline']['lane']), end=" ")
           print(str(champ_dict[int(z['championId'])]) + " Win: " + str(z['stats']['win']), end=" ")
           print("DPM: " + str(dpm) + " GPM: " + str(gpm) + " CPM: " + str(cpm)) 
@@ -51,8 +54,8 @@ while x <= num:
             wins += 1
           else:
             losses += 1
-  current = x
-  x = x + 1
+  current = num
+  x = x - 1
 
 print("====================RESULTS====================")
 print("Games: " + str(current))
