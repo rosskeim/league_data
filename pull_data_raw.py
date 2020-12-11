@@ -3,7 +3,16 @@ import pandas as pd
 import datetime
 
 account = "bEEDcwc6ohmom9qBAJM7fHav5nSxp8H2E-Tfvf4iofQI0w"
-api_key = "RGAPI-21774bc2-7376-4a99-8060-cdbc2765c16b"
+api_key = "RGAPI-e68f6cde-c59e-4776-b80e-6d0cb90e8ec2"
+
+############### LOAD CHAMPION DICT ##################
+with open('champion.json') as f:
+  data = json.load(f)
+  champ_dict = {}
+
+for k,v in data['data'].items():
+  champ_dict[int(v['key'])] = k
+#####################################################
 
 response = requests.get("https://na1.api.riotgames.com/lol/match/v4/matchlists/by-account/" + account + "?api_key=" + api_key)
 
@@ -36,7 +45,7 @@ while x <= num:
           print("#" + str(games[x]), end="-")
           print(str(data['gameCreation']), end=":")
           print(str(z['timeline']['role']) + " " + str(z['timeline']['lane']), end=" ")
-          print("champion(" + str(z['championId']) + ") Win: " + str(z['stats']['win']), end=" ")
+          print(str(champ_dict[int(z['championId'])]) + " Win: " + str(z['stats']['win']), end=" ")
           print("DPM: " + str(dpm) + " GPM: " + str(gpm) + " CPM: " + str(cpm)) 
           if z['stats']['win'] == True:
             wins += 1
