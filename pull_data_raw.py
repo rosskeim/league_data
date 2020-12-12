@@ -29,6 +29,8 @@ losses = 0
 print("Enter number of games: ")
 num = int(input())
 
+output = []
+
 x = num
 while x >= 0:
   response = requests.get("https://na1.api.riotgames.com/lol/match/v4/matches/" + str(games[x]) + "?api_key=" + str(api_key))
@@ -46,6 +48,7 @@ while x >= 0:
           rawtime = data['gameCreation']
           timestamp = datetime.datetime.fromtimestamp(int(rawtime/1000)) 
           gametime = timestamp.strftime('%d/%m/%Y %H:%M:%S')
+          output.append(gametime)
           print(str(gametime), end=":")
           print(str(z['timeline']['role']) + " " + str(z['timeline']['lane']), end=" ")
           print(str(champ_dict[int(z['championId'])]) + " Win: " + str(z['stats']['win']), end=" ")
@@ -62,3 +65,7 @@ print("Games: " + str(current))
 print("Wins: " + str(wins))
 print("Losses: " + str(losses))
 print("Winrate: " + str(wins/current))
+
+with open('history.csv', 'w') as p:
+    for item in output:
+        p.write("%s\n" % item)
