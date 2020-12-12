@@ -3,7 +3,7 @@ import pandas as pd
 import datetime
 
 account = "bEEDcwc6ohmom9qBAJM7fHav5nSxp8H2E-Tfvf4iofQI0w"
-api_key = "RGAPI-cf136e3f-ed3c-426d-8b82-9c39400374b9"
+api_key = "RGAPI-8b0698d3-9a3f-447d-b666-dedeb28d662f"
 
 ############### LOAD CHAMPION DICT ##################
 with open('champion.json', encoding='utf-8') as f:
