@@ -1,9 +1,10 @@
 import requests, json
 import pandas as pd
 import datetime
+import time
 
 account = "bEEDcwc6ohmom9qBAJM7fHav5nSxp8H2E-Tfvf4iofQI0w"
-api_key = "RGAPI-8b0698d3-9a3f-447d-b666-dedeb28d662f"
+api_key = "RGAPI-d3c3a3e8-0b24-4f44-bd57-0f5e196c4db0"
 
 ############### LOAD CHAMPION DICT ##################
 with open('champion.json', encoding='utf-8') as f:
@@ -31,49 +32,45 @@ losses = 0
 print("Enter number of games: ")
 num = int(input())
 
-output = {}
-responses = []
+matchdata = []
 
 for i in games:
 
   response = requests.get("https://na1.api.riotgames.com/lol/match/v4/matches/" + str(i) + "?api_key=" + str(api_key))
-  output[i] = response.json()
-  output = sorted(output.items(), key=operator.itemgetter(1), reverse=True)
+  time.sleep(2)
+  response_f = response.json()
+  print(response_f)
+  rawtime = response_f['gameCreation']
+  timestamp = datetime.datetime.fromtimestamp(int(rawtime/1000)) 
+  gametime = timestamp.strftime('%d/%m/%Y %H:%M:%S')
+  duration = float(response_f['gameDuration']/60)
 
-  for o in output.items():
+  for y in response_f['participantIdentities']:
+    if(y['player']['currentAccountId'] == account):
+      part = y['participantId']
+      for z in response_f['participants']:
+        if z['participantId'] == part:
+          role = z['timeline']['role']
+          lane = z['timeline']['lane']
+          champ = champ_dict[int(z['championId'])]
+          win = z['stats']['win']
+          dpm = round(z['stats']['deaths']/duration, 2)
+          gpm =  round(z['stats']['goldEarned']/duration, 2)
+          cpm = round(z['stats']['totalMinionsKilled']/duration, 2)
+          matchdata.append([gametime, role, lane, champ, win, duration, dpm, gpm, cpm])
+          break
+match_df = pd.DataFrame(matchdata, columns=['gametime', 'role', 'lane', 'champ', 'win', 'duration', 'dpm', 'gpm', 'cpm'])
+match_df.to_csv('history.csv')
 
-  
-    rawtime = r['gameCreation']
-    timestamp = datetime.datetime.fromtimestamp(int(rawtime/1000)) 
-    gametime = timestamp.strftime('%d/%m/%Y %H:%M:%S')
-    output.append(gametime)
+print(match_df)
 
-    for y in r['participantIdentities']:
-      if(y['player']['currentAccountId'] == account):
-        part = y['participantId']
-        for z in r['participants']:
-          if z['participantId'] == part:
-            duration = float(r['gameDuration']/60)
-            dpm = round(z['stats']['deaths']/duration, 2)
-            gpm =  round(z['stats']['goldEarned']/duration, 2)
-            cpm = round(z['stats']['totalMinionsKilled']/duration, 2)
-            print("#" + str(games[i]), end="-")
-            
-            print(str(gametime), end=":")
-            print(str(z['timeline']['role']) + " " + str(z['timeline']['lane']), end=" ")
-            print(str(champ_dict[int(z['championId'])]) + " Win: " + str(z['stats']['win']), end=" ")
-            print("DPM: " + str(dpm) + " GPM: " + str(gpm) + " CPM: " + str(cpm)) 
-            if z['stats']['win'] == True:
-              wins += 1
-            else:
-              losses += 1
-
+"""
 print("====================RESULTS====================")
 print("Games: " + str(num))
 print("Wins: " + str(wins))
 print("Losses: " + str(losses))
 print("Winrate: " + str(wins/num))
-
 with open('history.csv', 'w') as p:
     for item in output:
         p.write("%s\n" % item)
+"""
